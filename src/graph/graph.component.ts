@@ -1,46 +1,48 @@
 // rename transition due to conflict with d3 transition
+import 'd3-transition';
+
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
+  NgZone,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewChildren,
   ViewEncapsulation,
-  NgZone,
-  ChangeDetectorRef,
-  OnChanges,
-  SimpleChanges
 } from '@angular/core';
 import {
   BaseChartComponent,
+  calculateViewDimensions,
   ChartComponent,
   ColorHelper,
   ViewDimensions,
-  calculateViewDimensions
 } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
-import 'd3-transition';
-import { Observable, Subscription, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
-import { Layout } from '../models/layout.model';
-import { LayoutService } from './layouts/layout.service';
+
 import { Edge } from '../models/edge.model';
-import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
+import { Layout } from '../models/layout.model';
+import { ClusterNode, Node } from '../models/node.model';
 import { id } from '../utils';
+import { LayoutService } from './layouts/layout.service';
 
 /**
  * Matrix
@@ -358,21 +360,20 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     // Recalc the layout
     const result = this.layout.run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
-    this.graphSubscription.add(result$.subscribe(graph => {
-      this.graph = graph;
-      this.tick();
-    }));
-    result$
-      .pipe(first(graph => graph.nodes.length > 0))
-      .subscribe(() => this.applyNodeDimensions());
+    this.graphSubscription.add(
+      result$.subscribe(graph => {
+        this.graph = graph;
+        this.tick();
+      })
+    );
+    result$.pipe(first(graph => graph.nodes.length > 0)).subscribe(() => this.applyNodeDimensions());
   }
 
   tick() {
     // Transposes view options to the node
     this.graph.nodes.map(n => {
-      n.transform = `translate(${
-        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
-      })`;
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
+        0})`;
       if (!n.data) {
         n.data = {};
       }
@@ -381,9 +382,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       };
     });
     (this.graph.clusters || []).map(n => {
-      n.transform = `translate(${
-        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
-      })`;
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
+        0})`;
       if (!n.data) {
         n.data = {};
       }
@@ -425,7 +425,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.calcDominantBaseline(newLink);
       newLinks.push(newLink);
     }
-    
+
     this.graph.edges = newLinks;
 
     // Map the old links for animations
@@ -544,7 +544,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
-    const initializeNode = (n) => {
+    const initializeNode = n => {
       if (!n.id) {
         n.id = id();
       }
@@ -744,16 +744,20 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     for (const link of this.graph.edges) {
       if (
-        link.target === node.id || link.source === node.id ||
-        (link.target as any).id === node.id || (link.source as any).id === node.id
+        link.target === node.id ||
+        link.source === node.id ||
+        (link.target as any).id === node.id ||
+        (link.source as any).id === node.id
       ) {
         if (this.layout && typeof this.layout !== 'string') {
           const result = this.layout.updateEdge(this.graph, link);
           const result$ = result instanceof Observable ? result : of(result);
-          this.graphSubscription.add(result$.subscribe(graph => {
-            this.graph = graph;
-            this.redrawEdge(link);
-          }));
+          this.graphSubscription.add(
+            result$.subscribe(graph => {
+              this.graph = graph;
+              this.redrawEdge(link);
+            })
+          );
         }
       }
     }
@@ -923,7 +927,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   @HostListener('document:touchmove', ['$event'])
-  onTouchMove($event: TouchEvent): void {
+  onTouchMove(event): void {
+    // Workaround to avoid TouchEvent not defined error in dev mode in non-Chrome browsers
+    const $event: TouchEvent = event;
     if (this.isPanning && this.panningEnabled) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
