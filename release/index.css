@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"5.1.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"5.1.1" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -20,5 +20,7 @@
     cursor: move; }
   .graph .node-group .node:focus {
     outline: none; }
+  .graph .cluster rect {
+    opacity: 0.2; }
 
 /*# sourceMappingURL=index.map*/

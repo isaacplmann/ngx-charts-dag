@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { GraphComponent } from './graph.component';
 import { ChartCommonModule } from '@swimlane/ngx-charts';
 import { MouseWheelDirective } from './mouse-wheel.directive';
+import { LayoutService } from './layouts/layout.service';
 export { GraphComponent };
 var GraphModule = /** @class */ (function () {
     function GraphModule() {
@@ -9,14 +10,9 @@ var GraphModule = /** @class */ (function () {
     GraphModule.decorators = [
         { type: NgModule, args: [{
                     imports: [ChartCommonModule],
-                    declarations: [
-                        GraphComponent,
-                        MouseWheelDirective
-                    ],
-                    exports: [
-                        GraphComponent,
-                        MouseWheelDirective
-                    ]
+                    declarations: [GraphComponent, MouseWheelDirective],
+                    exports: [GraphComponent, MouseWheelDirective],
+                    providers: [LayoutService]
                 },] },
     ];
     return GraphModule;

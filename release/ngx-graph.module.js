@@ -5,9 +5,7 @@ var NgxGraphModule = /** @class */ (function () {
     }
     NgxGraphModule.decorators = [
         { type: NgModule, args: [{
-                    exports: [
-                        GraphModule
-                    ]
+                    exports: [GraphModule]
                 },] },
     ];
     return NgxGraphModule;

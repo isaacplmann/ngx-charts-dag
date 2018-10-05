@@ -23,14 +23,14 @@ This library is focused on handling graph data (anything with nodes and edges) r
 ```
 <ngx-graph
   class="chart-container"
+  [nodes]="hierarchialGraph.nodes"
+  [links]="hierarchialGraph.links"
+  [curve]="curve"
+  [scheme]="colorScheme"
   [view]="view"
   [legend]="showLegend"
-  [links]="hierarchialGraph.links"
   (legendLabelClick)="onLegendLabelClick($event)"
-  [nodes]="hierarchialGraph.nodes"
-  [scheme]="colorScheme"
-  [orientation]="orientation"
-  [curve]="curve"
+  [layoutSettings]="layoutSettings"
   (select)="select($event)">
 
   <ng-template #defsTemplate>

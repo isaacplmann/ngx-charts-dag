@@ -12,3 +12,5 @@
     cursor: move; }
   .graph .node-group .node:focus {
     outline: none; }
+  .graph .cluster rect {
+    opacity: 0.2; }
